@@ -1,0 +1,226 @@
+/* ===== CLEAN MINIMAL COLOR VARIABLES ===== */
+:root {
+  /* Clean, Minimal Color Scheme */
+  --text-dark: #2D2D2D;           /* Dark gray - elegant */
+  --text-soft: #6B6B6B;            /* Medium gray */
+  --accent-terracotta: #C17B5C;    /* Warm terracotta - sophisticated */
+  --primary-white: #FFFFFF;         /* Pure white */
+  --bg-cream: #F9F7F5;             /* Soft cream */
+  --border-light: #E5E5E5;          /* Light gray border */
+  --shadow-subtle: 0 5px 20px rgba(0, 0, 0, 0.03);
+  --error-red: #dc3545;
+  --success-green: #28a745;
+}
+
+/* ===== RESET & BASE STYLES ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Critical scroll fix */
+html {
+  scroll-behavior: auto !important;
+  scroll-padding-top: 0 !important;
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  color: var(--text-dark);
+  background-color: var(--primary-white);
+  line-height: 1.6;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  animation: fadeInContent 0.3s ease-in forwards;
+}
+
+/* Fade in animation */
+@keyframes fadeInContent {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Container */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  width: 100%;
+}
+
+/* Smooth Scroll - applied only after page load */
+@media (prefers-reduced-motion: no-preference) {
+  .smooth-scroll-enabled {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+}
+
+/* Selection Color */
+::selection {
+  background-color: var(--accent-terracotta);
+  color: white;
+}
+
+/* Scrollbar Styling - Minimal */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-cream);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-terracotta);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a56748; /* Darker terracotta */
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-terracotta) var(--bg-cream);
+}
+
+/* Loading State */
+.loading-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-cream);
+}
+
+/* Utility Classes */
+.text-center {
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Prevent scroll jumps */
+.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 20px;
+  }
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-dark);
+}
+
+h1 {
+  font-size: 4rem;
+  line-height: 1.1;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Sections */
+.section {
+  padding: 80px 0;
+}
+
+.section-light {
+  background-color: var(--bg-cream);
+}
+
+/* Buttons - Minimal */
+.btn {
+  display: inline-block;
+  padding: 12px 30px;
+  background-color: var(--accent-terracotta);
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.btn:hover {
+  background-color: #a56748; /* Darker terracotta */
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--text-dark);
+  color: var(--text-dark);
+}
+
+.btn-outline:hover {
+  background-color: var(--text-dark);
+  color: white;
+  border-color: var(--text-dark);
+}
+
+/* Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 40px;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 2rem;
+  }
+  
+  .section {
+    padding: 60px 0;
+  }
+}
