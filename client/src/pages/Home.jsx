@@ -231,7 +231,7 @@ const Home = () => {
             </div>
             
             <div className="about-image">
-              <img src="src/assets/img1.jpeg" alt="Maheen Nadeem" />
+              <img src="public/img1.jpeg" alt="Maheen Nadeem" />
             </div>
           </div>
         </div>
