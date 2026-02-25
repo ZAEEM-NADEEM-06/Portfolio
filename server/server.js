@@ -1,3 +1,10 @@
+console.log('🚀 Server starting...');
+console.log('📊 Env vars loaded:', {
+  hasMongoURI: !!process.env.MONGODB_URI,
+  hasJWT: !!process.env.JWT_SECRET,
+  hasAdminPath: !!process.env.ADMIN_SECRET_PATH,
+  nodeEnv: process.env.NODE_ENV
+});
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
