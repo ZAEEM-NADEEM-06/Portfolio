@@ -53,13 +53,15 @@ const AdminLogin = ({ onLogin }) => {
       
       const response = await authAPI.login(credentials)
       
-      if (response.data.success) {
+      // Check if login was successful
+      if (response.data && response.data.token) {
+        localStorage.setItem('token', response.data.token)
         onLogin()
         toast.success('Login successful!')
         navigate('/dashboard', { replace: true })
       } else {
-        setError(response.data.message || 'Login failed')
-        toast.error(response.data.message || 'Login failed')
+        setError(response.data?.message || 'Login failed')
+        toast.error(response.data?.message || 'Login failed')
       }
       
     } catch (error) {
@@ -139,6 +141,7 @@ const AdminLogin = ({ onLogin }) => {
               onChange={handleChange}
               required
               disabled={loading}
+              placeholder="maheen"
               autoComplete="off"
             />
           </div>
@@ -153,6 +156,7 @@ const AdminLogin = ({ onLogin }) => {
               onChange={handleChange}
               required
               disabled={loading}
+              placeholder="••••••••"
               autoComplete="off"
             />
           </div>

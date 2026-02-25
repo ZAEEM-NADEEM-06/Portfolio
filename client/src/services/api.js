@@ -3,6 +3,9 @@ import axios from 'axios'
 const adminPath = import.meta.env.VITE_ADMIN_SECRET_PATH || 'maheen-dashboard-2025'
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
+console.log('🔐 API URL:', API_URL)
+console.log('🔐 Admin Path:', adminPath)
+
 const api = axios.create({
   baseURL: API_URL,
   headers: { 'Content-Type': 'application/json' },
@@ -10,7 +13,7 @@ const api = axios.create({
   timeout: 8000
 })
 
-// Request interceptor
+// Add token to requests if it exists
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -22,7 +25,7 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 )
 
-// Response interceptor
+// Handle response errors
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -33,9 +36,7 @@ api.interceptors.response.use(
       localStorage.removeItem('sessionId')
       sessionStorage.clear()
       
-      // Show user-friendly message
       alert('You have been logged out because you logged in from another device.')
-      
       window.location.href = `/${adminPath}`
     }
     
@@ -54,9 +55,6 @@ api.interceptors.response.use(
     // Handle network errors
     else if (error.code === 'ERR_NETWORK') {
       console.log('🔌 Network error - server unreachable')
-      
-      // Don't clear token immediately, let the health check handle it
-      // Just show a toast in the UI component
     }
     
     return Promise.reject(error)
@@ -66,8 +64,8 @@ api.interceptors.response.use(
 // Health check function
 export const checkServerHealth = async () => {
   try {
-    const response = await api.get('/health')
-    return response.data.status === 'online'
+    const response = await fetch(`${API_URL}/health`)
+    return response.ok
   } catch (error) {
     return false
   }
@@ -77,58 +75,194 @@ export const checkServerHealth = async () => {
 export const authAPI = {
   login: async (credentials) => {
     try {
-      const response = await api.post(`/${adminPath}/login`, credentials)
-      if (response.data.token) {
-        localStorage.setItem('token', response.data.token)
-        if (response.data.sessionId) {
-          localStorage.setItem('sessionId', response.data.sessionId)
-        }
+      const response = await fetch(`${API_URL}/${adminPath}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(credentials)
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        const error = new Error(data.message || 'Login failed')
+        error.response = { data }
+        throw error
       }
-      return response
+      
+      // Store token if login successful
+      if (data.token) {
+        localStorage.setItem('token', data.token)
+      }
+      
+      return { data }
     } catch (error) {
       throw error
     }
   },
-  logout: () => {
-    const token = localStorage.getItem('token')
-    localStorage.removeItem('token')
-    localStorage.removeItem('sessionId')
-    sessionStorage.clear()
-    
-    if (token) {
-      return api.post(`/${adminPath}/logout`).catch(() => ({}))
+  
+  logout: async () => {
+    try {
+      const response = await fetch(`${API_URL}/${adminPath}/logout`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      
+      localStorage.removeItem('token')
+      localStorage.removeItem('sessionId')
+      sessionStorage.clear()
+      
+      return await response.json()
+    } catch (error) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('sessionId')
+      sessionStorage.clear()
+      return { success: true, message: 'Logged out locally' }
     }
-    return Promise.resolve({})
   },
-  verify: () => api.get(`/${adminPath}/verify`),
-  health: () => api.get('/health')
+  
+  verify: async () => {
+    try {
+      const response = await fetch(`${API_URL}/${adminPath}/verify`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Verification failed')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
+  },
+  
+  changePassword: async (passwordData) => {
+    try {
+      const response = await fetch(`${API_URL}/${adminPath}/change-password`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(passwordData)
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Password change failed')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
+  }
 }
 
-// Projects APIs remain the same
+// Projects APIs
 export const projectsAPI = {
-  getAll: () => api.get('/projects'),
-  getById: (id) => api.get(`/projects/${id}`),
-  create: (data) => {
-    const formData = new FormData()
-    Object.keys(data).forEach(key => {
-      if (key === 'image') formData.append('image', data.image)
-      else formData.append(key, data[key])
-    })
-    return api.post('/projects', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+  getAll: async () => {
+    try {
+      const response = await fetch(`${API_URL}/projects`)
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch projects')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
   },
-  update: (id, data) => {
-    const formData = new FormData()
-    Object.keys(data).forEach(key => {
-      if (key === 'image' && data.image) formData.append('image', data.image)
-      else formData.append(key, data[key])
-    })
-    return api.put(`/projects/${id}`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
-    })
+  
+  getById: async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/projects/${id}`)
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch project')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
   },
-  delete: (id) => api.delete(`/projects/${id}`)
+  
+  create: async (formData) => {
+    try {
+      const response = await fetch(`${API_URL}/projects`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to create project')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
+  },
+  
+  update: async (id, formData) => {
+    try {
+      const response = await fetch(`${API_URL}/projects/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update project')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
+  },
+  
+  delete: async (id) => {
+    try {
+      const response = await fetch(`${API_URL}/projects/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+      
+      const data = await response.json()
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete project')
+      }
+      
+      return { data }
+    } catch (error) {
+      throw error
+    }
+  }
 }
 
 export default api
