@@ -133,6 +133,16 @@ app.use('*', (req, res) => {
   });
 });
 
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    message: 'Backend is working!',
+    env: {
+      hasMongoURI: !!process.env.MONGODB_URI,
+      adminPath: process.env.ADMIN_SECRET_PATH
+    }
+  });
+});
+
 // Export for Vercel
 module.exports = app;
 
