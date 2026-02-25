@@ -84,7 +84,7 @@ mongoose.connect(process.env.MONGODB_URI)
     process.exit(1);
   });
 
-// Routes
+// Routes - IMPORTANT: Make sure this is correct
 console.log(`🔐 Admin routes mounted at: /api/${adminPath}`);
 app.use(`/api/${adminPath}`, authRoutes);
 app.use('/api/projects', projectRoutes);
@@ -111,22 +111,6 @@ app.get('/', (req, res) => {
         update: 'PUT /api/projects/:id',
         delete: 'DELETE /api/projects/:id',
         reorder: 'PUT /api/projects/order'
-      },
-      sessions: {
-        getMySessions: 'GET /api/sessions',
-        terminateOthers: 'POST /api/sessions/terminate-others',
-        terminateAll: 'POST /api/sessions/terminate-all',
-        terminateSession: 'DELETE /api/sessions/:sessionId',
-        getUserSessions: 'GET /api/sessions/user/:userId (Admin)',
-        getStats: 'GET /api/sessions/stats (Admin)',
-        cleanup: 'POST /api/sessions/cleanup (Admin)'
-      },
-      contact: {
-        submit: 'POST /api/contact',
-        getMessages: 'GET /api/messages (Admin)',
-        getMessage: 'GET /api/messages/:id (Admin)',
-        markAsRead: 'PUT /api/messages/:id/read (Admin)',
-        deleteMessage: 'DELETE /api/messages/:id (Admin)'
       }
     }
   });
@@ -149,10 +133,14 @@ app.use('*', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔑 Admin login URL: http://localhost:${PORT}/api/${adminPath}/login`);
-  console.log(`🏥 Health check: http://localhost:${PORT}/api/health`);
-});
+// Export for Vercel
+module.exports = app;
+
+// Only listen if not in serverless environment
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🔑 Admin login URL: http://localhost:${PORT}/api/${adminPath}/login`);
+  });
+}
