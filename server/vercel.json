@@ -2,14 +2,33 @@
   "version": 2,
   "builds": [
     {
-      "src": "server.js",
-      "use": "@vercel/node"
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
     }
   ],
   "routes": [
     {
+      "src": "/assets/(.*)",
+      "dest": "/dist/assets/$1"
+    },
+    {
+      "src": "/cv/(.*)",
+      "dest": "/dist/cv/$1"
+    },
+    {
+      "src": "/maheen-dashboard-2025",
+      "dest": "/dist/index.html"
+    },
+    {
+      "src": "/dashboard",
+      "dest": "/dist/index.html"
+    },
+    {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/dist/index.html"
     }
   ]
 }
